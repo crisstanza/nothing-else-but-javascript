@@ -1,14 +1,47 @@
 (function() {
 
+	function getFrequency(note) {
+		var notes = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+		var octave;
+		if (note.length == 3) {
+			octave = note.charAt(2);
+		} else {
+			octave = note.charAt(1);
+		}
+		var keyNumber = notes.indexOf(note.slice(0, -1));
+		if (keyNumber < 3) {
+			keyNumber = keyNumber + 12 + ((octave - 1) * 12) + 1; 
+		} else {
+			keyNumber = keyNumber + ((octave - 1) * 12) + 1; 
+		}
+		return 440 * Math.pow(2, (keyNumber- 49) / 12);
+	};
+
 	function goPlay(song) {
+		var context = new webkitAudioContext();
+		var oscillator = context.createOscillator();
+		var gainNode = context.createGainNode();
+		oscillator.type = 3;
+		gainNode.gain.value = 1;
+		oscillator.connect(gainNode);
+		gainNode.connect(context.destination);
 		var tracks = song.tracks;
 		var track = tracks[0];
 		var length = track.length;
 		for ( var i = 0 ; i < length ; i++ ) {
 			var note = track[i];
 
-			console.log(note.n);
+			console.log(i + ') '+ note.n + ': ' + getFrequency(note.n));
 
+			setTimeout(
+				function() {
+					console.log(i);
+				}, 1000 * i
+			);
+
+			oscillator.frequency.value = getFrequency(note.n);
+			oscillator.noteOn(0);
+			oscillator.noteOff(0.5);
 		}
 	}
 
@@ -46,16 +79,3 @@
 	window.addEventListener('load', init, false);	
 
 })();
-
-/*
-	var context = new webkitAudioContext();
-	var oscillator = context.createOscillator();
-	var gainNode = context.createGainNode();
-	oscillator.type = 3;
-	oscillator.frequency.value = 440;
-	gainNode.gain.value = 1;
-	oscillator.connect(gainNode);
-	gainNode.connect(context.destination);
-	oscillator.noteOn(0);
-	oscillator.noteOff(1);
-*/
