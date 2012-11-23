@@ -18,6 +18,12 @@
 	};
 
 	function goPlay(song) {
+		var tracks = song.tracks;
+		var track = tracks[0];
+		playNote(0, track);
+	}
+
+	function playNote(i, track) {
 		var context = new webkitAudioContext();
 		var oscillator = context.createOscillator();
 		var gainNode = context.createGainNode();
@@ -25,24 +31,23 @@
 		gainNode.gain.value = 1;
 		oscillator.connect(gainNode);
 		gainNode.connect(context.destination);
-		var tracks = song.tracks;
-		var track = tracks[0];
+
+		var note = track[i];
+		oscillator.frequency.value = getFrequency(note.n);
+		oscillator.noteOn(0);
+		oscillator.noteOff(0.35);
+
 		var length = track.length;
-		for ( var i = 0 ; i < length ; i++ ) {
-			var note = track[i];
-
-			console.log(i + ') '+ note.n + ': ' + getFrequency(note.n));
-
+		if ( i < (length - 1) ) {
 			setTimeout(
 				function() {
-					console.log(i);
-				}, 1000 * i
+					playNote(i + 1, track);
+				}, 500
 			);
-
-			oscillator.frequency.value = getFrequency(note.n);
-			oscillator.noteOn(0);
-			oscillator.noteOff(0.5);
 		}
+
+		console.log(i + ') '+ note.n + ': ' + getFrequency(note.n));
+
 	}
 
 	function doPlay() {
@@ -76,6 +81,6 @@
 		addCLickListener('bt-stop', doStop);
 	}
 
-	window.addEventListener('load', init, false);	
+	window.addEventListener('load', init, false);
 
 })();
